@@ -23,19 +23,18 @@ import com.google.android.gms.common.api.GoogleApiClient;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.Socket;
 
 public class MainActivity extends AppCompatActivity {
-    private Socket socket = new Socket();
-    private int port = 5000;
+
     private EditText ipTextField;
     private TextView info;
     private DataInputStream is;
     private DataOutputStream os;
     private BluetoothAdapter bta;
     private Client myClient;
+    private String bestName = null;
+    private int bestDistance = -200;
+    private int port = 5000;
 
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
@@ -49,10 +48,22 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        //bring object from content to Main
         Button btn = (Button) findViewById(R.id.connectBtn);
         Button getInfo = (Button) findViewById(R.id.getInfo);
         info = (TextView) findViewById(R.id.info);
         ipTextField = (EditText) findViewById(R.id.ip);
+
+        //blutooth init
+        final BluetoothManager btm = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
+        bta = btm.getAdapter();
+        registerReceiver(receiver, new IntentFilter(BluetoothDevice.ACTION_FOUND));
+        if (bta == null) {
+            Toast.makeText(MainActivity.this, R.string.bluetoothError, Toast.LENGTH_SHORT).show();
+        }
+
+        //button click actions
         btn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
                 String ip = ipTextField.getText().toString();
@@ -95,6 +106,37 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    private final BroadcastReceiver receiver = new BroadcastReceiver(){
+        @Override
+        public void onReceive(Context context, Intent intent) {
 
+            String action = intent.getAction();
+            if(BluetoothDevice.ACTION_FOUND.equals(action)) {
+                int  rssi = intent.getShortExtra(BluetoothDevice.EXTRA_RSSI,Short.MIN_VALUE);
+                String name = intent.getStringExtra(BluetoothDevice.EXTRA_NAME);
+                if(rssi > bestDistance){
+                    bestName = name;
+                    bestDistance = rssi;
+                }
+                //Toast.makeText(getApplicationContext(), name + "  RSSI: " + rssi + "dBm", Toast.LENGTH_SHORT).show();
+            }
+        }
+    };
+
+    protected int getBestDistance(){
+        return bestDistance;
+    }
+
+    protected void setBestDistance(int distance){
+        bestDistance = distance;
+    }
+
+    protected String getBestName(){
+        return bestName;
+    }
+
+    protected void setBestName(String name){
+        bestName = name;
+    }
 
 }
