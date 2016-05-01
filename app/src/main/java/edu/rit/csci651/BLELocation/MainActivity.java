@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
     private DataInputStream is;
     private DataOutputStream os;
     private BluetoothAdapter bta;
-    private Client client;
+    private Client myClient;
 
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
@@ -47,31 +47,25 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         Button btn = (Button) findViewById(R.id.connectBtn);
         Button getInfo = (Button) findViewById(R.id.getInfo);
-
         info = (TextView) findViewById(R.id.info);
-
-
         ipTextField = (EditText) findViewById(R.id.ip);
         btn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
                 String ip = ipTextField.getText().toString();
-                client = new Client(ip, port, info, bta);
-                client.execute();
-
-                    
+                myClient = new Client(ip, port, info, bta, MainActivity.this);
+                myClient.execute();
             }
         });
 
-            getInfo.setOnClickListener(new View.OnClickListener(){
-                public void onClick (View view){
-                    client.getInfo();
-                }
-            });
+        getInfo.setOnClickListener(new View.OnClickListener(){
+            public void onClick (View view){
+                myClient.getInfo();
+            }
+        });
 
 
         // ATTENTION: This was auto-generated to implement the App Indexing API.

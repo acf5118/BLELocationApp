@@ -34,12 +34,14 @@ public class Client extends AsyncTask<Void, Void, Void> {
     BluetoothAdapter bta;
     DataInputStream inputStream;
     DataOutputStream outputStream;
+    MainActivity ma;
 
-    Client(String ip, int port, TextView info, BluetoothAdapter bta) {
+    Client(String ip, int port, TextView info, BluetoothAdapter bta, MainActivity ma) {
         this.ip = ip;
         this.port = port;
         this.info = info;
         this.bta = bta;
+        this.ma = ma;
     }
 
     @Override
@@ -47,7 +49,7 @@ public class Client extends AsyncTask<Void, Void, Void> {
         final BluetoothManager btm = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
         bta = btm.getAdapter();
         if (bta == null) {
-            Toast.makeText(MainActivity, R.string.bluetoothError, Toast.LENGTH_SHORT).show();
+            Toast.makeText(ma, R.string.bluetoothError, Toast.LENGTH_SHORT).show();
         }
         Socket socket = null;
         registerReceiver(receiver, new IntentFilter(BluetoothDevice.ACTION_FOUND));
@@ -77,7 +79,7 @@ public class Client extends AsyncTask<Void, Void, Void> {
         super.onPostExecute(result);
     }
 
-    private void getInfo(){
+    protected void getInfo(){
         bta.startDiscovery();
         if (bestName != null) {
             try {
