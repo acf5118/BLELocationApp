@@ -35,8 +35,8 @@ public class MainActivity extends AppCompatActivity {
     private DataInputStream is;
     private DataOutputStream os;
     private BluetoothAdapter bta;
-    private String bestName = null;
-    private int bestDistance = -200;
+    private Client client;
+
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
      * See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -47,48 +47,29 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        final BluetoothManager btm = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
-        bta = btm.getAdapter();
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         Button btn = (Button) findViewById(R.id.connectBtn);
         Button getInfo = (Button) findViewById(R.id.getInfo);
 
         info = (TextView) findViewById(R.id.info);
-        if (bta == null) {
-            Toast.makeText(this, R.string.bluetoothError, Toast.LENGTH_SHORT).show();
-        }
-        registerReceiver(receiver, new IntentFilter(BluetoothDevice.ACTION_FOUND));
+
+
         ipTextField = (EditText) findViewById(R.id.ip);
         btn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
                 String ip = ipTextField.getText().toString();
-                try {
-                    socket.connect(new InetSocketAddress(ip, port));
-                    is = new DataInputStream(socket.getInputStream());
-                    os = new DataOutputStream(socket.getOutputStream());
-                } catch (IOException e) {
-                   Toast.makeText(MainActivity.this, (R.string.connectError + ip), Toast.LENGTH_SHORT).show();
-                }
+                client = new Client(ip, port, info, bta);
+                client.execute();
+
                     
             }
         });
 
             getInfo.setOnClickListener(new View.OnClickListener(){
                 public void onClick (View view){
-                    bta.startDiscovery();
-                    if (bestName != null) {
-                        try {
-                            os.writeUTF(bestName);
-                            String response = is.readUTF();
-                            info.setText(response);
-                        }
-                        catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        bestDistance = -200;
-                        bestName = null;
-                    }
+                    client.getInfo();
                 }
             });
 
@@ -120,21 +101,6 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private final BroadcastReceiver receiver = new BroadcastReceiver(){
-        @Override
-        public void onReceive(Context context, Intent intent) {
 
-            String action = intent.getAction();
-            if(BluetoothDevice.ACTION_FOUND.equals(action)) {
-                int  rssi = intent.getShortExtra(BluetoothDevice.EXTRA_RSSI,Short.MIN_VALUE);
-                String name = intent.getStringExtra(BluetoothDevice.EXTRA_NAME);
-                if(rssi > bestDistance){
-                    bestName = name;
-                    bestDistance = rssi;
-                }
-                //Toast.makeText(getApplicationContext(), name + "  RSSI: " + rssi + "dBm", Toast.LENGTH_SHORT).show();
-            }
-        }
-    };
 
 }
