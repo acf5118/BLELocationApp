@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">BLELocation</string>
+    <string name="action_settings">Settings</string>
+    <string name="bluetoothError">"Bluetooth is not supported"</string>
+    <string name="connectError">"Could not connect to server at "</string>
+    <string name="unknown_device">"Unknown Device"</string>
+
+</resources>
