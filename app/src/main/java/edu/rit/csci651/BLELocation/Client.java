@@ -4,8 +4,10 @@ package edu.rit.csci651.BLELocation;
  * Created by bryan on 5/1/16.
  */
         import java.io.DataInputStream;
+        import java.io.DataOutput;
         import java.io.DataOutputStream;
         import java.io.IOException;
+        import java.net.InetSocketAddress;
         import java.net.Socket;
         import java.net.UnknownHostException;
         import android.bluetooth.BluetoothAdapter;
@@ -16,19 +18,14 @@ public class Client extends AsyncTask<Void, Void, Void> {
 
     private String ip;
     private int port;
-    private TextView info;
-    private BluetoothAdapter bta;
-    private DataInputStream inputStream;
-    private DataOutputStream outputStream;
+    private DataInputStream is;
+    private DataOutputStream os;
     private MainActivity ma;
-    private Socket socket;
 
 
-    Client(String ip, int port, TextView info, BluetoothAdapter bta, MainActivity ma) {
-        this.ip = ip;
-        this.port = port;
-        this.info = info;
-        this.bta = bta;
+    Client(MainActivity ma) {
+        ip = ma.getIp();
+        port = ma.getPort();
         this.ma = ma;
     }
 
@@ -36,12 +33,19 @@ public class Client extends AsyncTask<Void, Void, Void> {
     protected Void doInBackground(Void... arg0) {
 
         try {
-            System.out.println("In background: " + ip + " " + port);
-            socket = new Socket(ip, port);
-            System.out.println("past connect");
+            Socket socket = new Socket();
+            socket.connect(new InetSocketAddress(ip, port), 5000);
+            System.out.println("Connected");
 
-            inputStream = new DataInputStream(socket.getInputStream());
-            outputStream = new DataOutputStream(socket.getOutputStream());
+            ma.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    ma.setConnect();
+                }
+            });
+
+            is = new DataInputStream(socket.getInputStream());
+            os = new DataOutputStream(socket.getOutputStream());
         }
         catch (UnknownHostException e) {
             e.printStackTrace();
@@ -49,23 +53,15 @@ public class Client extends AsyncTask<Void, Void, Void> {
         catch (IOException e) {
             e.printStackTrace();
         }
+
         return null;
     }
 
-    protected void getInfo(){
-        bta.startDiscovery();
-        if (ma.getBestName() != null) {
-            try {
-                outputStream.writeUTF(ma.getBestName());
-                String response = inputStream.readUTF();
-                info.setText(response);
-            }
-            catch (IOException e) {
-                e.printStackTrace();
-            }
-            ma.setBestDistance(-200);
-            ma.setBestName(null);
-        }
+    protected DataInputStream getIS(){
+        return is;
     }
 
+    protected DataOutputStream getOS(){
+        return os;
+    }
 }

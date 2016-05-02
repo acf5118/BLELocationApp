@@ -2,7 +2,6 @@ package edu.rit.csci651.BLELocation;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -21,18 +20,17 @@ import android.widget.Toast;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 
 public class MainActivity extends AppCompatActivity {
 
     private EditText ipTextField;
-    private TextView info;
-    private DataInputStream is;
-    private DataOutputStream os;
+    private TextView infoFromServer;
+    private Button connect;
     private BluetoothAdapter bta;
     private Client myClient;
+    private GetInfoTask getInfoTask;
     private String bestName = null;
+    private String ip;
     private int bestDistance = -200;
     private int port = 5000;
 
@@ -50,31 +48,29 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         //bring object from content to Main
-        Button btn = (Button) findViewById(R.id.connectBtn);
+        connect = (Button) findViewById(R.id.connectBtn);
         Button getInfo = (Button) findViewById(R.id.getInfo);
-        info = (TextView) findViewById(R.id.info);
+        infoFromServer = (TextView) findViewById(R.id.info);
         ipTextField = (EditText) findViewById(R.id.ip);
-
         //blutooth init
-        final BluetoothManager btm = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
-        bta = btm.getAdapter();
+        bta = BluetoothAdapter.getDefaultAdapter();
         registerReceiver(receiver, new IntentFilter(BluetoothDevice.ACTION_FOUND));
-        if (bta == null) {
-            Toast.makeText(MainActivity.this, R.string.bluetoothError, Toast.LENGTH_SHORT).show();
-        }
-
         //button click actions
-        btn.setOnClickListener(new View.OnClickListener() {
+        connect.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
-                String ip = ipTextField.getText().toString();
-                myClient = new Client(ip, port, info, bta, MainActivity.this);
+                ip = ipTextField.getText().toString();
+                myClient = new Client(MainActivity.this);
                 myClient.execute();
+
             }
         });
 
         getInfo.setOnClickListener(new View.OnClickListener(){
             public void onClick (View view){
-                myClient.getInfo();
+                if(bta.isDiscovering()){
+                    bta.cancelDiscovery();
+                }
+                bta.startDiscovery();
             }
         });
 
@@ -89,6 +85,22 @@ public class MainActivity extends AppCompatActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
+    }
+
+    @Override
+    protected void onStop(){
+        System.out.println("in stop");
+        unregisterReceiver(receiver);
+        bta.cancelDiscovery();
+        super.onStop();
+    }
+
+    @Override
+    public void onDestroy() {
+        unregisterReceiver(receiver);
+        bta.cancelDiscovery();
+        super.onDestroy();
+
     }
 
     @Override
@@ -109,14 +121,19 @@ public class MainActivity extends AppCompatActivity {
     private final BroadcastReceiver receiver = new BroadcastReceiver(){
         @Override
         public void onReceive(Context context, Intent intent) {
+            System.out.println("in receiver");
 
             String action = intent.getAction();
             if(BluetoothDevice.ACTION_FOUND.equals(action)) {
-                int  rssi = intent.getShortExtra(BluetoothDevice.EXTRA_RSSI,Short.MIN_VALUE);
+                int rssi = intent.getShortExtra(BluetoothDevice.EXTRA_RSSI, Short.MIN_VALUE);
                 String name = intent.getStringExtra(BluetoothDevice.EXTRA_NAME);
-                if(rssi > bestDistance){
+                System.out.println("in discovery found " + name + " at " + rssi);
+                if (rssi > bestDistance) {
                     bestName = name;
                     bestDistance = rssi;
+                    System.out.println("new best " + bestName + " at " + bestDistance);
+                    getInfoTask = new GetInfoTask(MainActivity.this);
+                    getInfoTask.execute();
                 }
                 //Toast.makeText(getApplicationContext(), name + "  RSSI: " + rssi + "dBm", Toast.LENGTH_SHORT).show();
             }
@@ -137,6 +154,30 @@ public class MainActivity extends AppCompatActivity {
 
     protected void setBestName(String name){
         bestName = name;
+    }
+
+    protected void setInfo(String response) {
+        infoFromServer.setText(response);
+    }
+
+    protected Client getClient(){
+        return myClient;
+    }
+
+    protected BluetoothAdapter getBta(){
+        return bta;
+    }
+
+    protected String getIp(){
+        return ip;
+    }
+
+    protected int getPort(){
+        return port;
+    }
+
+    protected void setConnect(){
+        connect.setText("Connected");
     }
 
 }

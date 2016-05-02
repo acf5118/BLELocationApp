@@ -139,7 +139,7 @@ public class Server {
 						
 						String request = fromClient.readUTF();
 						System.out.println(request);
-						toClient.writeUTF("Stuff from Server");
+						toClient.writeUTF("Stuff from Server: " + request);
 					}
 				}
 				catch(IOException ex){
