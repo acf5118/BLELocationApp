@@ -36,7 +36,13 @@ public class Client extends AsyncTask<Void, Void, Void> {
             Socket socket = new Socket();
             socket.connect(new InetSocketAddress(ip, port), 5000);
             System.out.println("Connected");
-
+            is = new DataInputStream(socket.getInputStream());
+            os = new DataOutputStream(socket.getOutputStream());
+            String devices = is.readUTF();
+            String[] deviceNames = devices.split(",");
+            for(String name: deviceNames){
+                ma.addDevice(name);
+            }
             ma.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -44,8 +50,7 @@ public class Client extends AsyncTask<Void, Void, Void> {
                 }
             });
 
-            is = new DataInputStream(socket.getInputStream());
-            os = new DataOutputStream(socket.getOutputStream());
+
         }
         catch (UnknownHostException e) {
             e.printStackTrace();

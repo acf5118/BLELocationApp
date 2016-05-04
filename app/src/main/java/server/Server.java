@@ -1,3 +1,4 @@
+
 /**
 * Server.java
 * 
@@ -30,6 +31,8 @@ public class Server {
 	
 	private ServerSocket socket;
 	private int port = 5000;
+	private String[] deviceNames = {"elementary-0", "Nicks Phone"};
+
 	
 	public Server(){
 		try {
@@ -134,7 +137,10 @@ public class Server {
 					
 					//create data output stream
 					DataOutputStream toClient = new DataOutputStream(connectedSocket.getOutputStream());
-					
+
+
+					toClient.writeUTF(getDevices());
+
 					while(true){
 						
 						String request = fromClient.readUTF();
@@ -146,6 +152,14 @@ public class Server {
 					System.err.println(ex);
 				}//end catch 
 				
+			}
+
+			public String getDevices(){
+				String devices = "";
+				for(String d: deviceNames){
+					devices += d + ",";
+				}
+				return devices;
 			}
 		}
 	}//end inner class

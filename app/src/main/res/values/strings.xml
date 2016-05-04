@@ -4,5 +4,10 @@
     <string name="bluetoothError">"Bluetooth is not supported"</string>
     <string name="connectError">"Could not connect to server at "</string>
     <string name="unknown_device">"Unknown Device"</string>
+    <string name="startScan">"Getting Information..."</string>
+    <string name="connected">"Connected"</string>
+    <string name="updating">"Updating"</string>
+    <string name="updateInfo">"Update Information"</string>
+
 
 </resources>

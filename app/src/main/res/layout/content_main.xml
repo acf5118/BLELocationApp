@@ -38,7 +38,6 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="info"
         android:id="@+id/info"
         android:layout_marginTop="57dp"
         android:layout_below="@+id/label"
@@ -51,4 +50,16 @@
         android:id="@+id/getInfo"
         android:layout_below="@+id/label"
         android:layout_alignEnd="@+id/connectBtn" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Cancel"
+        android:id="@+id/cancel"
+        android:layout_below="@+id/label"
+        android:layout_alignParentStart="true"
+        android:layout_toStartOf="@+id/getInfo"
+        android:layout_alignEnd="@+id/label"
+        android:visibility="invisible"/>
+
 </RelativeLayout>

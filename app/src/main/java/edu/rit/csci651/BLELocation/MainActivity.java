@@ -20,12 +20,16 @@ import android.widget.Toast;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
 
+import java.util.ArrayList;
+
 
 public class MainActivity extends AppCompatActivity {
 
     private EditText ipTextField;
     private TextView infoFromServer;
     private Button connect;
+    private Button getInfo;
+    private Button cancel;
     private BluetoothAdapter bta;
     private Client myClient;
     private GetInfoTask getInfoTask;
@@ -33,6 +37,8 @@ public class MainActivity extends AppCompatActivity {
     private String ip;
     private int bestDistance = -200;
     private int port = 5000;
+    private boolean scanning;
+    private ArrayList<String> devicesName = new ArrayList<String>();
 
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
@@ -49,12 +55,13 @@ public class MainActivity extends AppCompatActivity {
 
         //bring object from content to Main
         connect = (Button) findViewById(R.id.connectBtn);
-        Button getInfo = (Button) findViewById(R.id.getInfo);
+        getInfo = (Button) findViewById(R.id.getInfo);
+        cancel = (Button) findViewById(R.id.cancel);
         infoFromServer = (TextView) findViewById(R.id.info);
         ipTextField = (EditText) findViewById(R.id.ip);
         //blutooth init
         bta = BluetoothAdapter.getDefaultAdapter();
-        registerReceiver(receiver, new IntentFilter(BluetoothDevice.ACTION_FOUND));
+        registerReceiver(receiver, createFilter());
         //button click actions
         connect.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
@@ -68,9 +75,20 @@ public class MainActivity extends AppCompatActivity {
         getInfo.setOnClickListener(new View.OnClickListener(){
             public void onClick (View view){
                 if(bta.isDiscovering()){
-                    bta.cancelDiscovery();
+                    endDiscovery();
                 }
                 bta.startDiscovery();
+                scanning = true;
+                setUpdate();
+                setCancel();
+            }
+        });
+
+        cancel.setOnClickListener(new View.OnClickListener(){
+            public void onClick (View view) {
+                endDiscovery();
+                setUpdate();
+                setCancel();
             }
         });
 
@@ -92,6 +110,8 @@ public class MainActivity extends AppCompatActivity {
         System.out.println("in stop");
         unregisterReceiver(receiver);
         bta.cancelDiscovery();
+        bestName = null;
+        bestDistance = -200;
         super.onStop();
     }
 
@@ -99,6 +119,8 @@ public class MainActivity extends AppCompatActivity {
     public void onDestroy() {
         unregisterReceiver(receiver);
         bta.cancelDiscovery();
+        bestName = null;
+        bestDistance = -200;
         super.onDestroy();
 
     }
@@ -128,7 +150,7 @@ public class MainActivity extends AppCompatActivity {
                 int rssi = intent.getShortExtra(BluetoothDevice.EXTRA_RSSI, Short.MIN_VALUE);
                 String name = intent.getStringExtra(BluetoothDevice.EXTRA_NAME);
                 System.out.println("in discovery found " + name + " at " + rssi);
-                if (rssi > bestDistance) {
+                if (devicesName.contains(name) && rssi > bestDistance) {
                     bestName = name;
                     bestDistance = rssi;
                     System.out.println("new best " + bestName + " at " + bestDistance);
@@ -137,8 +159,30 @@ public class MainActivity extends AppCompatActivity {
                 }
                 //Toast.makeText(getApplicationContext(), name + "  RSSI: " + rssi + "dBm", Toast.LENGTH_SHORT).show();
             }
+            if(BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
+                System.out.println("Finished scanning");
+                endDiscovery();
+                setCancel();
+                setUpdate();
+            }
         }
     };
+
+    private IntentFilter createFilter(){
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(BluetoothDevice.ACTION_FOUND);
+        filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
+        return filter;
+    }
+
+    private void endDiscovery(){
+        bta.cancelDiscovery();
+        scanning = false;
+        unregisterReceiver(receiver);
+        registerReceiver(receiver, createFilter());
+        bestName = null;
+        bestDistance = -200;
+    }
 
     protected int getBestDistance(){
         return bestDistance;
@@ -156,8 +200,8 @@ public class MainActivity extends AppCompatActivity {
         bestName = name;
     }
 
-    protected void setInfo(String response) {
-        infoFromServer.setText(response);
+    protected void setInfo(String message) {
+        infoFromServer.setText(message);
     }
 
     protected Client getClient(){
@@ -177,7 +221,31 @@ public class MainActivity extends AppCompatActivity {
     }
 
     protected void setConnect(){
-        connect.setText("Connected");
+        connect.setText(R.string.connected);
+    }
+
+    protected void setUpdate(){
+        if(scanning){
+            getInfo.setText(getString(R.string.updating));
+            setInfo(getString(R.string.startScan));
+        }
+        else{
+            getInfo.setText(getString(R.string.updateInfo));
+        }
+    }
+
+    private void setCancel() {
+        if(!scanning) {
+            cancel.setVisibility(View. INVISIBLE);
+        }
+        else{
+            cancel.setVisibility(View.VISIBLE);
+
+        }
+    }
+
+    protected void addDevice(String name){
+        devicesName.add(name);
     }
 
 }
