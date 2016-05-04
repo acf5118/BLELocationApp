@@ -73,14 +73,19 @@ public class MainActivity extends AppCompatActivity {
         });
 
         getInfo.setOnClickListener(new View.OnClickListener(){
-            public void onClick (View view){
-                if(bta.isDiscovering()){
-                    endDiscovery();
+            public void onClick (View view) {
+                if (connect.getText().equals(getString(R.string.connected))) {
+                    if (bta.isDiscovering()) {
+                        endDiscovery();
+                    }
+                    bta.startDiscovery();
+                    scanning = true;
+                    setUpdate();
+                    setCancel();
                 }
-                bta.startDiscovery();
-                scanning = true;
-                setUpdate();
-                setCancel();
+                else{
+                    Toast.makeText(getApplicationContext(), getString(R.string.notConnected), Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
@@ -105,13 +110,21 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    @Override
-    protected void onStop(){
-        System.out.println("in stop");
-        unregisterReceiver(receiver);
-        bta.cancelDiscovery();
+    protected void onResume(){
+        connect.setText(getString(R.string.connect));
+        infoFromServer.setText("");
+        registerReceiver(receiver, createFilter());
         bestName = null;
         bestDistance = -200;
+        super.onResume();
+    }
+
+    @Override
+    protected void onStop(){
+        unregisterReceiver(receiver);
+        bta.cancelDiscovery();
+        scanning = false;
+        setCancel();
         super.onStop();
     }
 
@@ -119,8 +132,8 @@ public class MainActivity extends AppCompatActivity {
     public void onDestroy() {
         unregisterReceiver(receiver);
         bta.cancelDiscovery();
-        bestName = null;
-        bestDistance = -200;
+        scanning = false;
+        setCancel();
         super.onDestroy();
 
     }
@@ -157,13 +170,16 @@ public class MainActivity extends AppCompatActivity {
                     getInfoTask = new GetInfoTask(MainActivity.this);
                     getInfoTask.execute();
                 }
-                //Toast.makeText(getApplicationContext(), name + "  RSSI: " + rssi + "dBm", Toast.LENGTH_SHORT).show();
             }
+
             if(BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
                 System.out.println("Finished scanning");
                 endDiscovery();
                 setCancel();
                 setUpdate();
+                if(infoFromServer.getText().equals(getString(R.string.startScan))){
+                    setInfo(getString(R.string.noDevices));
+                }
             }
         }
     };
@@ -184,20 +200,8 @@ public class MainActivity extends AppCompatActivity {
         bestDistance = -200;
     }
 
-    protected int getBestDistance(){
-        return bestDistance;
-    }
-
-    protected void setBestDistance(int distance){
-        bestDistance = distance;
-    }
-
     protected String getBestName(){
         return bestName;
-    }
-
-    protected void setBestName(String name){
-        bestName = name;
     }
 
     protected void setInfo(String message) {
@@ -221,7 +225,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     protected void setConnect(){
-        connect.setText(R.string.connected);
+        connect.setText(getString(R.string.connected));
     }
 
     protected void setUpdate(){
@@ -237,11 +241,19 @@ public class MainActivity extends AppCompatActivity {
     private void setCancel() {
         if(!scanning) {
             cancel.setVisibility(View. INVISIBLE);
+            if(infoFromServer.getText().equals(getString(R.string.startScan))){
+                setInfo(getString(R.string.cancelled));
+            }
         }
         else{
             cancel.setVisibility(View.VISIBLE);
 
         }
+    }
+
+    protected void showToast(String message){
+        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+
     }
 
     protected void addDevice(String name){

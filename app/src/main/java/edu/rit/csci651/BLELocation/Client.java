@@ -53,10 +53,21 @@ public class Client extends AsyncTask<Void, Void, Void> {
 
         }
         catch (UnknownHostException e) {
-            e.printStackTrace();
+            ma.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    ma.showToast(ma.getString(R.string.unknownHost));
+                }
+            });
         }
         catch (IOException e) {
-            e.printStackTrace();
+            ma.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    ma.showToast(ma.getString(R.string.IOError));
+                }
+            });
+
         }
 
         return null;
