@@ -167,19 +167,13 @@ public class MainActivity extends AppCompatActivity {
                     bestName = name;
                     bestDistance = rssi;
                     System.out.println("new best " + bestName + " at " + bestDistance);
-                    getInfoTask = new GetInfoTask(MainActivity.this);
-                    getInfoTask.execute();
                 }
             }
 
             if(BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
                 System.out.println("Finished scanning");
-                endDiscovery();
-                setCancel();
-                setUpdate();
-                if(infoFromServer.getText().equals(getString(R.string.startScan))){
-                    setInfo(getString(R.string.noDevices));
-                }
+                getInfoTask = new GetInfoTask(MainActivity.this);
+                getInfoTask.execute();
             }
         }
     };
@@ -240,7 +234,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void setCancel() {
         if(!scanning) {
-            cancel.setVisibility(View. INVISIBLE);
+            cancel.setVisibility(View.INVISIBLE);
             if(infoFromServer.getText().equals(getString(R.string.startScan))){
                 setInfo(getString(R.string.cancelled));
             }
@@ -260,4 +254,9 @@ public class MainActivity extends AppCompatActivity {
         devicesName.add(name);
     }
 
+    protected void endOfDiscovery(){
+        endDiscovery();
+        setCancel();
+        setUpdate();
+    }
 }

@@ -9,38 +9,37 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="edu.rit.csci651.BLELocation.MainActivity"
-    tools:showIn="@layout/activity_main">
+    tools:context="edu.rit.csci651.BLELocation.MainActivity">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/linearLayout">
+
+        <EditText
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight=".65"
+            android:id="@+id/ip"
+            android:layout_above="@+id/label"
+            android:layout_alignParentStart="true"/>
+
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight=".35"
+            android:text="Connect"
+            android:id="@+id/connectBtn"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true" />
+
+    </LinearLayout>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Server Address"
         android:id="@+id/label"
-        android:layout_below="@+id/connectBtn"
-        android:layout_alignParentStart="true" />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Connect"
-        android:id="@+id/connectBtn"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentEnd="true" />
-
-    <EditText
-        android:layout_width="400px"
-        android:layout_height="wrap_content"
-        android:id="@+id/ip"
-        android:layout_above="@+id/label"
-        android:layout_alignParentStart="true" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/info"
-        android:layout_marginTop="57dp"
-        android:layout_below="@+id/label"
+        android:layout_below="@+id/linearLayout"
         android:layout_alignParentStart="true" />
 
     <Button
@@ -49,17 +48,22 @@
         android:text="Update Information"
         android:id="@+id/getInfo"
         android:layout_below="@+id/label"
-        android:layout_alignEnd="@+id/connectBtn" />
+        android:layout_alignParentEnd="true" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Cancel"
         android:id="@+id/cancel"
-        android:layout_below="@+id/label"
-        android:layout_alignParentStart="true"
-        android:layout_toStartOf="@+id/getInfo"
-        android:layout_alignEnd="@+id/label"
-        android:visibility="invisible"/>
+        android:visibility="invisible"
+        android:layout_alignTop="@+id/getInfo"
+        android:layout_alignEnd="@+id/label" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/info"
+        android:layout_below="@+id/cancel"
+        android:layout_alignStart="@+id/cancel" />
 
 </RelativeLayout>

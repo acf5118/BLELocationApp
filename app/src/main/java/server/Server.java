@@ -31,7 +31,7 @@ public class Server {
 	
 	private ServerSocket socket;
 	private int port = 5000;
-	private String[] deviceNames = {"elementary-0", "Nicks Phone"};
+	private String[] deviceNames = {"elementary-0", "Nicks Phone", "Bean", "Adam's iPhone"};
 
 	
 	public Server(){

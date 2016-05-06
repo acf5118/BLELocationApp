@@ -17,6 +17,7 @@ public class GetInfoTask extends AsyncTask<Void, Void, Void> {
     private DataOutputStream os;
     private BluetoothAdapter bta;
     private MainActivity ma;
+    private String response;
 
     GetInfoTask(MainActivity ma){
         is = ma.getClient().getIS();
@@ -30,22 +31,37 @@ public class GetInfoTask extends AsyncTask<Void, Void, Void> {
             try {
                 System.out.println("sending to server " + ma.getBestName());
                 os.writeUTF(ma.getBestName());
-                final String response = is.readUTF();
+                response = is.readUTF();
                 System.out.println("response from server: " + response);
-
-                ma.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        ma.setInfo(response);
-                    }
-                });
-
             }
             catch (IOException e) {
                 e.printStackTrace();
             }
         }
+        else{
+            System.out.println("In else");
+            response = ma.getString(R.string.noDevices);
+        }
 
+        ma.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                ma.setInfo(response);
+            }
+        });
         return null;
     }
+
+    @Override
+    protected void onPostExecute(Void result){
+        System.out.println("Inpost");
+        ma.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                ma.endOfDiscovery();
+            }
+        });
+        super.onPostExecute(result);
+    }
+
 }
