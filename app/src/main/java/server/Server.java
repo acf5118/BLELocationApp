@@ -11,6 +11,8 @@
 **/
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -20,6 +22,8 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Scanner;
 
 /**
 * Server class that maintains a server time that can be changed with correct username and password.  
@@ -31,7 +35,9 @@ public class Server {
 	
 	private ServerSocket socket;
 	private int port = 5000;
-	private String[] deviceNames = {"elementary-0", "Nicks Phone", "Bean", "Adam's iPhone"};
+	private String[] deviceNames = {"Bean", "elementary-0", "Nicks Phone", "Adam's iPhone"};
+	private HashMap<String, String> paintingInfo = new HashMap<String, String>();
+	private String file = "/home/bryan/BLELocationApp/app/src/main/assets/info.txt";
 
 	
 	public Server(){
@@ -43,6 +49,7 @@ public class Server {
 		catch (IOException e) {
 			e.printStackTrace();
 		}
+		importPaintingInfo(file);
 		new HandleTCP().start();
 	}
 	
@@ -72,7 +79,22 @@ public class Server {
         }
         return null;
     }
-	
+
+	public void importPaintingInfo(String file){
+		try {
+			Scanner in = new Scanner(new FileReader(file));
+			int i = 0;
+			while(in.hasNextLine()){
+				String value = in.nextLine();
+				paintingInfo.put(deviceNames[i], value);
+				i++;
+			}
+		}
+		catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+	}
+
 	class HandleTCP extends Thread{
 		
 		/**
@@ -145,7 +167,7 @@ public class Server {
 						
 						String request = fromClient.readUTF();
 						System.out.println(request);
-						toClient.writeUTF("Stuff from Server: " + request);
+						toClient.writeUTF(paintingInfo.get(request.trim()));
 					}
 				}
 				catch(IOException ex){
