@@ -1,30 +1,41 @@
 package edu.rit.csci651.BLELocation;
 
-import android.bluetooth.BluetoothAdapter;
 import android.os.AsyncTask;
-import android.widget.TextView;
-
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
 /**
  * Created by bryan on 5/2/16.
+ * @author Bryan Passino, Nicholas Jenis, Adam Fowles
  */
-public class GetInfoTask extends AsyncTask<Void, Void, Void> {
+public class GetInfoTask extends AsyncTask<Void, Void, Void>
+{
 
+    // private state
     private DataInputStream is;
     private DataOutputStream os;
-    private BluetoothAdapter bta;
     private MainActivity ma;
     private String response;
 
-    GetInfoTask(MainActivity ma){
-        is = ma.getClient().getIS();
-        os = ma.getClient().getOS();
-        bta = ma.getBta();
+    /**
+     * Constructor for a task
+     * that gets info from the server
+     * @param ma - the main activity
+     */
+    public GetInfoTask(MainActivity ma)
+    {
+        this.is = ma.getClient().getIS();
+        this.os = ma.getClient().getOS();
         this.ma = ma;
     }
+
+    /**
+     * The background task for this Async Task
+     * Sends and gets info from the server
+     * @param params - not used
+     * @return - nothing
+     */
     @Override
     protected Void doInBackground(Void... params) {
         if (ma.getBestName() != null) {
@@ -52,6 +63,11 @@ public class GetInfoTask extends AsyncTask<Void, Void, Void> {
         return null;
     }
 
+    /**
+     * After the doInBackground method finishes
+     * this will get called
+     * @param result - nothing
+     */
     @Override
     protected void onPostExecute(Void result){
         System.out.println("Inpost");

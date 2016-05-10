@@ -1,14 +1,5 @@
+package server;
 
-/**
-* Server.java
-* 
-* @version   $Id: 1.8
-*
-* Revisions:
-*
-*      Initial revision
-*
-**/
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.FileNotFoundException;
@@ -26,22 +17,27 @@ import java.util.HashMap;
 import java.util.Scanner;
 
 /**
-* Server class that maintains a server time that can be changed with correct username and password.  
-*
-* @author Bryan Passino
-*/
-
-public class Server {
-	
+ * Server class that maintains a server time that can be
+ * changed with correct username and password.
+ * @author Bryan Passino, Adam Fowles
+ */
+public class Server
+{
+	// private state
 	private ServerSocket socket;
 	private int port = 5000;
 	private String[] deviceNames = {"Bean", "elementary-0", "Nicks Phone", "Adam's iPhone"};
 	private HashMap<String, String> paintingInfo = new HashMap<String, String>();
-	private String file = "/home/bryan/BLELocationApp/app/src/main/assets/info.txt";
+	private String file = "app/src/main/assets/info.txt";
 
-	
-	public Server(){
-		try {
+	/**
+	 * Server constructor, creates
+	 * the socket and starts up the TCP Handlers
+	 */
+	public Server()
+	{
+		try
+		{
 			socket = new ServerSocket(port);
 			String ip = getCurrentIp();
 			System.out.println("Server Address: " + ip);
@@ -52,21 +48,31 @@ public class Server {
 		importPaintingInfo(file);
 		new HandleTCP().start();
 	}
-	
+
+	/**
+	 * Main method creates a new server object
+	 * @param args - unused
+     */
 	public static void main(String[] args){
 		new Server();
 	}
-	
-	public String getCurrentIp() throws UnknownHostException {
+
+	/**
+	 * Gets the current IP address of the host
+	 * @return - the IP as a string
+	 * @throws UnknownHostException
+     */
+	public String getCurrentIp() throws UnknownHostException
+	{
         try {
             Enumeration<NetworkInterface> networkInterfaces = NetworkInterface
                     .getNetworkInterfaces();
             while (networkInterfaces.hasMoreElements()) {
-                NetworkInterface ni = (NetworkInterface) networkInterfaces
-                        .nextElement();
+                NetworkInterface ni = networkInterfaces.nextElement();
                 Enumeration<InetAddress> nias = ni.getInetAddresses();
-                while(nias.hasMoreElements()) {
-                    InetAddress ia= (InetAddress) nias.nextElement();
+                while(nias.hasMoreElements())
+				{
+                    InetAddress ia= nias.nextElement();
                     if (!ia.isLinkLocalAddress() 
                      && !ia.isLoopbackAddress()
                      && ia instanceof Inet4Address) {
@@ -80,6 +86,10 @@ public class Server {
         return null;
     }
 
+	/**
+	 * Get the painting info from a file
+	 * @param file - the file to get into from
+     */
 	public void importPaintingInfo(String file){
 		try {
 			Scanner in = new Scanner(new FileReader(file));
@@ -95,15 +105,16 @@ public class Server {
 		}
 	}
 
-	class HandleTCP extends Thread{
+	/**
+	 * A class to handle the TCP connections
+	 */
+	private class HandleTCP extends Thread
+	{
 		
 		/**
-		* Accept a socket connection and starts an inner thread to handle the connection.
-		*
-		*@param		none	
-		*
-		*@return	void		
-		*/
+		 * Accept a socket connection and starts
+		 * an inner thread to handle the connection.
+		 */
 		public void run(){
 			while(true){
 				try {
@@ -121,33 +132,24 @@ public class Server {
 		
 		/**
 		* Thread to handle individual TCP connection
-		*
-		*@param		n/a	
-		*
-		*@return	n/a		
 		*/
-		class TCP_Connection implements Runnable{
+		private class TCP_Connection implements Runnable
+		{
 			private Socket connectedSocket;
 			
 			/**
 			* Constructor
-			*
-			*@param	 	Socket connectedSocket	
-			*
-			*@return	n/a		
 			*/
-			public TCP_Connection(Socket connectedSocket){
+			public TCP_Connection(Socket connectedSocket)
+			{
 				this.connectedSocket = connectedSocket;
 			}
 			
 			/**
-			* Accepts an incoming request to return time or to set time. The response is sent back along 
-			* with hop info at the end of return message.
-			*
-			*@param		none	
-			*
-			*@return	void		
-			*/
+			 * Accepts an incoming request to return time or to set time.
+			 * The response is sent back along
+			 * with hop info at the end of return message.
+			 */
 			public void run(){
 				String clientIp = "";
 				try{ 

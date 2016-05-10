@@ -16,15 +16,17 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
-
 import java.util.ArrayList;
 
-
-public class MainActivity extends AppCompatActivity {
-
+/**
+ * @author Bryan Passino, Nicholas Jenis, Adam Fowles
+ */
+public class MainActivity
+        extends AppCompatActivity
+{
+    // private state
     private EditText ipTextField;
     private TextView infoFromServer;
     private Button connect;
@@ -46,6 +48,10 @@ public class MainActivity extends AppCompatActivity {
      */
     private GoogleApiClient client;
 
+    /**
+     * On create, when the application is launched
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -103,6 +109,11 @@ public class MainActivity extends AppCompatActivity {
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
+    /**
+     * Creates the menu
+     * @param menu - the menu to use
+     * @return true
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -110,6 +121,9 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
+    /**
+     * When the application resumes
+     */
     protected void onResume(){
         connect.setText(getString(R.string.connect));
         infoFromServer.setText("");
@@ -153,6 +167,9 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Create a broadcast receiver to handle intents
+     */
     private final BroadcastReceiver receiver = new BroadcastReceiver(){
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -194,30 +211,25 @@ public class MainActivity extends AppCompatActivity {
         bestDistance = -200;
     }
 
+    // Access methods
     protected String getBestName(){
         return bestName;
     }
-
     protected void setInfo(String message) {
         infoFromServer.setText(message);
     }
-
     protected Client getClient(){
         return myClient;
     }
-
     protected BluetoothAdapter getBta(){
         return bta;
     }
-
     protected String getIp(){
         return ip;
     }
-
     protected int getPort(){
         return port;
     }
-
     protected void setConnect(){
         connect.setText(getString(R.string.connected));
     }
