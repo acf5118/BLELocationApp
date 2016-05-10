@@ -135,7 +135,9 @@ public class MainActivity
 
     @Override
     protected void onStop(){
-        unregisterReceiver(receiver);
+        try {
+            unregisterReceiver(receiver);
+        }catch (IllegalArgumentException e){}
         bta.cancelDiscovery();
         scanning = false;
         setCancel();
@@ -144,7 +146,9 @@ public class MainActivity
 
     @Override
     public void onDestroy() {
-        unregisterReceiver(receiver);
+        try {
+            unregisterReceiver(receiver);
+        }catch (IllegalArgumentException e){}
         bta.cancelDiscovery();
         scanning = false;
         setCancel();
